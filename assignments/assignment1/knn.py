@@ -55,7 +55,8 @@ class KNN:
         for i_test in range(num_test):
             for i_train in range(num_train):
                 # TODO: Fill dists[i_test][i_train]
-                pass
+                dists[i_test][i_train]=np.sum ( np.abs( self.train_X[i_train] - X[i_test]))
+        return dists
 
     def compute_distances_one_loop(self, X):
         '''
@@ -75,7 +76,8 @@ class KNN:
         for i_test in range(num_test):
             # TODO: Fill the whole row of dists[i_test]
             # without additional loops
-            pass
+            dists[i_test] = np.sum( np.abs( self.train_X - X[i_test] ),axis=1)
+        return dists
 
     def compute_distances_no_loops(self, X):
         '''
@@ -94,7 +96,8 @@ class KNN:
         # Using float32 to to save memory - the default is float64
         dists = np.zeros((num_test, num_train), np.float32)
         # TODO: Implement computing all distances with no loops!
-        pass
+        dists = np.sum(np.abs(self.train_X- X[:,None]),axis=2)
+        return dists
 
     def predict_labels_binary(self, dists):
         '''
@@ -113,7 +116,18 @@ class KNN:
         for i in range(num_test):
             # TODO: Implement choosing best class based on k
             # nearest training samples
-            pass
+            cnt = 0
+            for j in range(self.k):
+                ind = dists[i].argmin()
+                if self.train_y[ind] == True:
+                    cnt += 1
+                else:
+                    cnt -= 1
+                dists[i][ind] = np.inf
+            if cnt >= 0:
+                pred[i] = True
+            else:
+                pred[i] = False
         return pred
 
     def predict_labels_multiclass(self, dists):
@@ -134,5 +148,10 @@ class KNN:
         for i in range(num_test):
             # TODO: Implement choosing best class based on k
             # nearest training samples
-            pass
+            classes = np.array([0,0,0,0,0,0,0,0,0,0])
+            for j in range(self.k):
+                ind = dists[i].argmin()
+                classes[self.train_y[ind]] += 1
+                dists[i][ind] = np.inf
+            pred[i] = classes.argmax()
         return pred
